@@ -61,7 +61,7 @@ Each correctness property is written in **LTL or CTL**.
 | **#** | **Property Description** | **Specification** | **Status** |
 |------|-----------------|-------------------|------------|
 | **1** | No two adjacent lanes are green simultaneously | 'AG(!lane1 \| !lane2)' | ✅ Passed |
-| **2** | Cars do not hit pedestrians | `G(!lane3 | !northwdw)` | ✅ Passed |
+| **2** | Cars do not hit pedestrians | `G(!lane3 \| !northwdw)` | ✅ Passed |
 | **3** | Center lane will eventually be green | `G F(lane2)` | ❌ Failed (Counterexample found) |
 | **4** | Successive greens for the south lane are separated by 8 cycles | *(See LTL in `traffic_light.smv`)* | ✅ Passed |
 | **5** | Each lane gets a green before the next pedestrian walk signal | *(See LTL in `traffic_light.smv`)* | ❌ Failed (Fairness issue) |
