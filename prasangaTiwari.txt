@@ -1,0 +1,162 @@
+--Name: Prasanga Tiwari
+
+MODULE main
+
+
+VAR
+
+lane1: boolean;
+lane2: boolean;
+lane3: boolean;
+-- cycle here represents the different stages of when a particular lane traffic light is green
+cycle: {0,1,2}; 
+current : {3,2,1};
+
+
+northwdw: boolean;
+southwdw: boolean;
+button1: boolean;
+button2: boolean;
+nextwalk: boolean;
+counter: {3,2,1,0};
+
+ASSIGN
+
+init(lane1) := FALSE;
+init(lane2) := FALSE;
+init(lane3) := TRUE;
+init(cycle) := 1;
+init(current) := 3;
+
+init(northwdw):= FALSE;
+init(southwdw):= FALSE;
+init(button1):= {TRUE, FALSE};
+init(button2):= {TRUE, FALSE};
+init(nextwalk):= FALSE;
+init(counter):= 0;
+
+
+
+
+
+next(cycle) :=
+case
+   (cycle=1) : 2;
+   (cycle=2) : 0;
+   (cycle=0) & (nextwalk | counter=3 |counter=2 | counter=1): 0;
+   TRUE : 1;
+esac;
+
+
+next(current) :=
+case
+   next(cycle)=1 & (current=3): 2;
+   next(cycle)=1 & (current=2): 1;
+   next(cycle)=1 & (current=1): 3;
+   TRUE:current;
+esac;
+
+next(lane1) := 
+case
+   next(current)=1 & !(next(cycle)=0):TRUE;
+   TRUE: FALSE;
+esac;
+
+
+next(lane2) := 
+case
+   next(current)=2 & !(next(cycle)=0):TRUE;
+   TRUE: FALSE;
+esac;
+
+next(lane3) := 
+case
+   next(current)=3 & !(next(cycle)=0):TRUE;
+   TRUE: FALSE;
+esac;
+
+next(button1) :=
+case
+   TRUE: {TRUE,FALSE};
+esac;
+
+next(button2) :=
+case
+   TRUE: {TRUE, FALSE};
+esac;
+
+next(nextwalk):= 
+case
+   (button1 | button2): TRUE;
+   cycle = 0: FALSE;
+   TRUE: nextwalk;
+esac;
+
+next(counter) :=
+case
+   (cycle = 0) & (counter = 0) & (nextwalk): 1;
+   counter = 1: 2;
+   (counter = 2) & (button1 | button2): 2;
+   (counter = 2) & (!button1 & !button2): 3;
+   (counter = 3) & (button1 | button2): 2;
+   TRUE: 0;
+esac;
+
+
+next(northwdw) :=
+case 
+   (next(counter)=1 | next(counter)=2 | next(counter)=3) & next(cycle) = 0 : TRUE;
+   TRUE : FALSE; 
+esac;
+
+next(southwdw) :=
+case 
+   (next(counter)=1 | next(counter)=2 | next(counter)=3) & next(cycle) = 0 : TRUE;
+   TRUE : FALSE; 
+esac;
+
+
+SPEC
+--1. In all of the paths and every state, it is never the case that lane1 and lane2 are both green(true)
+--This is useful as a case where traffic signal being green on both of the lanes would cause collisions
+--as the cars attempt to merge
+AG(!lane1 | !lane2)
+
+LTLSPEC
+--2. It is always true that either lane3 is red or northwdw is not on walk, if not both.
+-- It is not trivial as we dont want a car is hit a pedestrian.
+G(!lane3 | ! northwdw)
+
+LTLSPEC
+--3. It is always true lane2 will eventually be green.
+-- This is not trivial as it will cause a traffic jam if cars aren't allowed to move forward.
+-- However, the statement is incorrect and a counterexample is provided.
+-- In the instance when the wdws are on walk, if one of the buttons is always pressed in
+-- the very last moment or second very last moment before it goes to "Don't Walk", none of the traffic lights
+-- will ever turn green, and the wdws are always going to be on walk.  
+-- In the counterexample, button1 or button2 will always be eventually true, and the cycle machine I created will always be in 0
+--, which means that it will always be in the "intermediate" period where all the lanes are red. The current value will
+--also not change, and the counter, which represents the the "Walk" stages, will never reach 0 as it will always be on walk.
+--Both the northwdw, and southwdw will be always true after a certain point since counter doesn't reach 0.
+G F(lane2)
+
+LTLSPEC
+--4. If it is true that lane3 is green now but not next (to establish that we are not dealing with successive ones),
+-- then it needs to be true that the next,next time lane3 is red, next,next,next time lane3 is green... until we reach
+-- 8 degrees of separation. This is important because we want to give time to other lanes.
+G ((lane3 & X (!lane3)) -> (X X (!lane3) & X X X (!lane3) & X X X X (!lane3) & X X X X X (!lane3) & X X X X X X (!lane3) & X X X X X X X (!lane3)))
+
+
+LTLSPEC 
+--5. "If a walk signal (northwdw = TRUE or southwdw = TRUE) is triggered, 
+--then each lane (lane1, lane2, lane3) will be green at least once 
+--before the next walk signal is triggered."This ensures that even with frequent pedestrian requests, all lanes will still receive a 
+--green light in a fair manner before the next walk signal.
+--Not True when a button is pressed after one of the lanes opens up. In which case, all the lanes don't have the opportunity
+--to open up since the wdws will be on walk before they all do. In such a case, the current machine will not transition
+--through all states as button1 or button2 will be True at some point before it happens. Also slightly relates to property 2. 
+G (((northwdw | southwdw) & X(!northwdw & !southwdw)) -> (!northwdw & !southwdw) U
+           F (lane1 & F (lane2 & F (lane3))));
+
+
+--I kind of winged the process, and hopefully I did it right. But I am curious how this is done when you are modeling something         --extremely complex. Are there certain ground rules?
