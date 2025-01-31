@@ -81,7 +81,7 @@ You can install **NuSMV 2.6.0 (non-ZCHAFF version)** from:
 
 
 ### **2️⃣ Running NuSMV on Your Local Machine**
-If you've installed NuSMV locally, navigate to the folder where your `.smv` file is located and run:
+If you've installed NuSMV locally, navigate to the folder where your `.smv` file is located and run. For me it was:
 ```bash
 /Users/prasangatiwari/Downloads/NuSMV-2.6.0-Darwin/bin/NuSMV traffic_light.smv.txt
 
