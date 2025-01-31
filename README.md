@@ -4,7 +4,7 @@
 Prasanga Tiwari  
 
 ## **Goal of the Project**  
-The goal of this homework is to apply **model checking** and **temporal logic** to solve a **real-world problem** involving a **traffic light controller**. The project models and verifies a **multi-lane road intersection with pedestrian crossings** to ensure it follows safety and fairness constraints.  
+The goal of this project is to apply **model checking** and **temporal logic** to solve a **real-world problem** involving a **traffic light controller**. The project models and verifies a **multi-lane road intersection with pedestrian crossings** to ensure it follows safety and fairness constraints.  
 
 ---
 
