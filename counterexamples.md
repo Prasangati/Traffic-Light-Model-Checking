@@ -2,7 +2,7 @@
 
 ## **Counterexample 1: "Center lane will eventually be green" (Fails)**
 ### **Property Specification**
-```smv
+```
 LTLSPEC G F(lane2)
 -- specification  G ( F lane2)  is false
 -- as demonstrated by the following execution sequence
@@ -47,7 +47,7 @@ Trace Type: Counterexample
     button1 = TRUE
     nextwalk = FALSE
     counter = 3
-
+```
 Expected Behavior:
 The center lane (lane2) should eventually receive a green light infinitely often.
 This ensures no traffic lane is permanently blocked.
@@ -64,7 +64,13 @@ Why This Happens:
 There is no limit on how often pedestrians can press the button.
 Walk signals override lane transitions, creating a starvation condition. 
 
+Real-World Implication:
+🚨 Certain lanes may never get a green light, leading to unfair traffic flow and congestion.
+✅ Possible Fix: Implement a guaranteed cycle rule to ensure each lane gets a green before another pedestrian request.
 
+## **Counterexample 2: "Each lane gets a green before the next pedestrian walk signal" (Fails)**
+### **Property Specification**
+```
 LTLSPEC G (((northwdw | southwdw) & X(!northwdw & !southwdw)) -> 
   (!northwdw & !southwdw) U F (lane1 & F (lane2 & F (lane3))))
 -- specification  G (((northwdw | southwdw) &  X (!northwdw & !southwdw)) -> 
@@ -163,3 +169,22 @@ Trace Type: Counterexample
     button1 = TRUE
     nextwalk = FALSE
     counter = 3
+```
+Expected Behavior:
+Before a new pedestrian walk signal, each lane (lane1, lane2, lane3) should receive a green light at least once.
+This ensures traffic moves fairly.
+
+What the Counterexample Shows:
+Traffic starts cycling normally (lane3 → lane2 → lane1).
+A pedestrian presses button1 while lane1 is green.
+WDW lights turn on (northwdw = TRUE, southwdw = TRUE).
+Lane1 and Lane2 get a green light, but Lane3 does not before another pedestrian request.
+A loop forms where pedestrian requests keep interrupting lane cycles.
+
+Why This Happens:
+Pedestrian requests are processed immediately, without waiting for all lanes to complete their cycle.
+Some lanes may be skipped indefinitely.
+
+Real-World Implication:
+🚨 Certain lanes may never get a green light, leading to unfair traffic flow and congestion.
+✅ Possible Fix: Introduce a cooldown period before a pedestrian request can be processed again.
