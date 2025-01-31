@@ -157,6 +157,3 @@ LTLSPEC
 --through all states as button1 or button2 will be True at some point before it happens. Also slightly relates to property 2. 
 G (((northwdw | southwdw) & X(!northwdw & !southwdw)) -> (!northwdw & !southwdw) U
            F (lane1 & F (lane2 & F (lane3))));
-
-
---I kind of winged the process, and hopefully I did it right. But I am curious how this is done when you are modeling something         --extremely complex. Are there certain ground rules?
