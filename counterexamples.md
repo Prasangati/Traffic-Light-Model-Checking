@@ -47,6 +47,24 @@ Trace Type: Counterexample
     button1 = TRUE
     nextwalk = FALSE
     counter = 3
+
+Expected Behavior:
+The center lane (lane2) should eventually receive a green light infinitely often.
+This ensures no traffic lane is permanently blocked.
+
+What the Counterexample Shows:
+Initially, lane3 is green.
+A pedestrian presses button1, triggering the walk signal.
+WDW lights turn on (northwdw = TRUE, southwdw = TRUE).
+Pedestrian requests keep coming right before the WDW lights turn off, extending the walk phase indefinitely.
+Because the walk phase never ends, lane transitions never resume.
+Lane2 never turns green, contradicting the property.
+
+Why This Happens:
+There is no limit on how often pedestrians can press the button.
+Walk signals override lane transitions, creating a starvation condition. 
+
+
 LTLSPEC G (((northwdw | southwdw) & X(!northwdw & !southwdw)) -> 
   (!northwdw & !southwdw) U F (lane1 & F (lane2 & F (lane3))))
 -- specification  G (((northwdw | southwdw) &  X (!northwdw & !southwdw)) -> 
